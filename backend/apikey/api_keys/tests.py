@@ -166,6 +166,20 @@ class APIKeyViewTests(TestCase):
     def test_invalid_key_returns_json_error(self):
         response = self.json_request('post', '/api/validate/', {'key': 'not-a-key'})
         self.assertEqual(response.status_code, 401)
+
+    def test_login_with_csrf_protection_enabled(self):
+        client = Client(enforce_csrf_checks=True)
+        csrf = client.get('/api/auth/csrf/')
+        self.assertEqual(csrf.status_code, 200)
+
+        response = client.post(
+            '/api/auth/login/',
+            json.dumps({'username': 'testuser', 'password': 'testpass123'}),
+            content_type='application/json',
+            HTTP_X_CSRFTOKEN=csrf.json()['csrf_token'],
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(client.get('/api/auth/me/').json()['username'], 'testuser')
         self.assertFalse(response.json()['valid'])
 
     def test_user_api_endpoints_require_login(self):
