@@ -143,15 +143,25 @@ def generate_api_key(request):
 @api_login_required
 @require_GET
 def list_api_keys(request):
-    api_keys = APIKey.objects.filter(user=request.user).select_related('user')
+    is_staff_view = request.user.is_staff
+    api_keys = APIKey.objects.select_related('user')
+    if not is_staff_view:
+        api_keys = api_keys.filter(user=request.user)
     data = [_serialize_key(api_key) for api_key in api_keys]
-    return JsonResponse({'api_keys': data, 'total': len(data)})
+    return JsonResponse({
+        'api_keys': data,
+        'total': len(data),
+        'is_staff_view': is_staff_view,
+    })
 
 
 @api_login_required
 @require_http_methods(['DELETE'])
 def delete_api_key(request, key_id):
-    deleted, _ = APIKey.objects.filter(id=key_id, user=request.user).delete()
+    api_keys = APIKey.objects.filter(id=key_id)
+    if not request.user.is_staff:
+        api_keys = api_keys.filter(user=request.user)
+    deleted, _ = api_keys.delete()
     if not deleted:
         return JsonResponse({'error': 'API key not found.'}, status=404)
     return JsonResponse({'success': True})

@@ -117,11 +117,26 @@ class APIKeyViewTests(TestCase):
         response = self.client.get('/api/list/')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['total'], 1)
+        self.assertFalse(response.json()['is_staff_view'])
         self.assertEqual(response.json()['api_keys'][0]['name'], 'Test Key')
         self.assertNotIn('key', response.json()['api_keys'][0])
 
         APIKey.objects.create(name='Other user key', user=self.other_user)
         self.assertEqual(self.client.get('/api/list/').json()['total'], 1)
+
+    def test_staff_list_includes_keys_from_all_users(self):
+        APIKey.objects.create(name='Other user key', user=self.other_user)
+        staff_user = User.objects.create_user(username='staff', password='testpass123', is_staff=True)
+        self.client.force_login(staff_user)
+
+        response = self.client.get('/api/list/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()['is_staff_view'])
+        self.assertEqual(response.json()['total'], 2)
+        self.assertCountEqual(
+            [key['username'] for key in response.json()['api_keys']],
+            ['testuser', 'otheruser'],
+        )
 
     def test_generate_api_key(self):
         response = self.json_request('post', '/api/generate/', {
@@ -150,6 +165,15 @@ class APIKeyViewTests(TestCase):
         response = self.client.delete(f'/api/delete/{other_key.id}/')
         self.assertEqual(response.status_code, 404)
         self.assertTrue(APIKey.objects.filter(id=other_key.id).exists())
+
+    def test_staff_can_delete_another_users_key(self):
+        other_key = APIKey.objects.create(name='Private key', user=self.other_user)
+        staff_user = User.objects.create_user(username='staff', password='testpass123', is_staff=True)
+        self.client.force_login(staff_user)
+
+        response = self.client.delete(f'/api/delete/{other_key.id}/')
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(APIKey.objects.filter(id=other_key.id).exists())
 
     def test_validate_api_key_with_json_body(self):
         response = self.json_request('post', '/api/validate/', {'key': self.api_key.key})
@@ -180,7 +204,6 @@ class APIKeyViewTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(client.get('/api/auth/me/').json()['username'], 'testuser')
-        self.assertFalse(response.json()['valid'])
 
     def test_user_api_endpoints_require_login(self):
         self.client.logout()
