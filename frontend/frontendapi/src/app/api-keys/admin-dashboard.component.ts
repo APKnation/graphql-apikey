@@ -36,7 +36,6 @@ interface KeyForm {
     <section class="page-container">
       <header class="page-heading">
         <div>
-          <p class="eyebrow">SUPERUSER</p>
           <h1>Administration</h1>
           <p class="page-description">View, create, edit, and delete every API key across all accounts.</p>
         </div>

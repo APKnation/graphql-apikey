@@ -14,7 +14,6 @@ import { APIKey } from './types';
     <section class="page-container">
       <header class="page-heading">
         <div>
-          <p class="eyebrow">{{ isStaffView ? 'ADMIN WORKSPACE' : 'YOUR WORKSPACE' }}</p>
           <h1>{{ isStaffView ? 'All API keys' : 'API keys' }}</h1>
           <p class="page-description">
             {{ isStaffView
