@@ -3,7 +3,6 @@ URL configuration for api_keys app.
 """
 from django.urls import path
 from .views import (
-    admin_dashboard,
     csrf_token,
     current_user,
     delete_api_key,
@@ -25,5 +24,4 @@ urlpatterns = [
     path('list/', list_api_keys, name='list'),
     path('delete/<uuid:key_id>/', delete_api_key, name='delete'),
     path('validate/', validate_api_key, name='validate'),
-    path('admin-dashboard/', admin_dashboard, name='admin_dashboard'),
 ]

@@ -3,15 +3,11 @@ from datetime import timedelta
 from functools import wraps
 
 from django.contrib.auth import authenticate, login, logout
-from django.db import models
 from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 from django.middleware.csrf import get_token
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
 
 from .models import APIKey
 
@@ -83,6 +79,7 @@ def login_view(request):
         'id': str(user.pk),
         'username': user.get_username(),
         'is_staff': user.is_staff,
+        'is_superuser': user.is_superuser,
     })
 
 
@@ -93,6 +90,7 @@ def current_user(request):
         'id': str(request.user.pk),
         'username': request.user.get_username(),
         'is_staff': request.user.is_staff,
+        'is_superuser': request.user.is_superuser,
     })
 
 
@@ -168,55 +166,35 @@ def delete_api_key(request, key_id):
 
 
 @csrf_exempt
-@api_view(['POST'])
-@permission_classes([AllowAny])
+@require_POST
 def validate_api_key(request):
-    """Validate a bearer key for external API clients."""
+    """Validate a key sent as a bearer token or as {"key": "..."} in the JSON body."""
     api_key_str = request.headers.get('Authorization', '')
     if api_key_str.lower().startswith('bearer '):
-        api_key_str = api_key_str[7:].strip()
+        api_key_str = api_key_str[7:]
     else:
-        api_key_str = request.data.get('key', '')
+        try:
+            api_key_str = _json_body(request).get('key', '')
+        except ValueError as error:
+            return JsonResponse({'error': str(error), 'valid': False}, status=400)
 
     if not isinstance(api_key_str, str) or not api_key_str.strip():
-        return Response({'error': 'Provide an API key.', 'valid': False}, status=400)
+        return JsonResponse({'error': 'Provide an API key.', 'valid': False}, status=400)
 
     try:
         api_key = APIKey.objects.select_related('user').get(key=api_key_str.strip())
     except APIKey.DoesNotExist:
-        return Response({'error': 'API key is invalid or expired.', 'valid': False}, status=401)
+        return JsonResponse({'error': 'API key is invalid or expired.', 'valid': False}, status=401)
 
     if not api_key.is_valid():
-        return Response({'error': 'API key is invalid or expired.', 'valid': False}, status=401)
+        return JsonResponse({'error': 'API key is invalid or expired.', 'valid': False}, status=401)
 
     api_key.increment_usage()
-    return Response({
+    return JsonResponse({
         'valid': True,
         'key_id': str(api_key.id),
         'name': api_key.name,
         'user_id': str(api_key.user_id),
         'scopes': api_key.scopes,
         'usage_count': api_key.usage_count,
-    })
-
-
-@api_login_required
-@require_GET
-def admin_dashboard(request):
-    if not request.user.is_staff:
-        return JsonResponse({'error': 'Staff access required.'}, status=403)
-
-    now = timezone.now()
-    active_keys = APIKey.objects.filter(is_active=True).filter(
-        models.Q(expires_at__isnull=True) | models.Q(expires_at__gt=now)
-    )
-    total_usage = APIKey.objects.aggregate(total=models.Sum('usage_count'))['total'] or 0
-    recent_keys = APIKey.objects.select_related('user').order_by('-created_at')[:10]
-
-    return JsonResponse({
-        'total_keys': APIKey.objects.count(),
-        'active_keys': active_keys.count(),
-        'expired_keys': APIKey.objects.filter(is_active=True, expires_at__lt=now).count(),
-        'total_usage': total_usage,
-        'recent_keys': [_serialize_key(api_key) for api_key in recent_keys],
     })
