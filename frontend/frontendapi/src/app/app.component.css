@@ -1,0 +1,160 @@
+.app-shell {
+  min-height: 100vh;
+}
+
+.app-header {
+  display: flex;
+  min-height: 76px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 0 5vw;
+  border-bottom: 1px solid #e6eaf0;
+  background: #fff;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: #17233c;
+  font-size: 1.05rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.brand-mark {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border-radius: 0.65rem;
+  background: #3158d5;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.primary-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.primary-nav a {
+  padding: 0.65rem 0.85rem;
+  border-radius: 0.55rem;
+  color: #5c667a;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.primary-nav a:hover,
+.primary-nav a.active {
+  background: #eef2ff;
+  color: #294cc4;
+}
+
+.account-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  white-space: nowrap;
+}
+
+.username {
+  color: #667085;
+  font-size: 0.85rem;
+}
+
+.logout-button {
+  padding: 0.55rem 0.75rem;
+  border: 1px solid #dfe4ed;
+  border-radius: 0.5rem;
+  background: #fff;
+  color: #344054;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  background: #f5f7fb;
+}
+
+.page-content {
+  min-height: calc(100vh - 77px);
+  padding: 1.5rem 0 3rem;
+}
+
+/* Signed-out pages (login) fill the whole screen without the app header. */
+.page-content.page-content-bare {
+  min-height: 100vh;
+  padding: 0;
+}
+
+.auth-error {
+  padding: 0.65rem 5vw;
+  background: #fff3f1;
+  color: #a32d25;
+  font-size: 0.86rem;
+  text-align: right;
+}
+
+@media (max-width: 900px) {
+  /* Brand + account on the first row, navigation as a grid of tabs below. */
+  .app-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "brand account"
+      "nav nav";
+    gap: 0.75rem;
+    min-height: 0;
+    padding: 0.85rem 1rem 0.75rem;
+  }
+
+  .brand {
+    grid-area: brand;
+  }
+
+  .account-actions {
+    grid-area: account;
+    min-width: 0;
+  }
+
+  .username {
+    max-width: 9rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .primary-nav {
+    display: grid;
+    grid-area: nav;
+    grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+    gap: 0.35rem;
+  }
+
+  .primary-nav a {
+    padding: 0.55rem 0.5rem;
+    border: 1px solid #edf0f5;
+    font-size: 0.84rem;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .page-content {
+    padding-top: 0.5rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .username {
+    display: none;
+  }
+}

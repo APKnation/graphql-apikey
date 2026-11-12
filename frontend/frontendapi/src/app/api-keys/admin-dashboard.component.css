@@ -1,0 +1,158 @@
+:host {
+  display: block;
+}
+
+.heading-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.notice {
+  margin-bottom: 1rem;
+}
+
+.key-form {
+  margin-bottom: 1.25rem;
+}
+
+.form-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.form-title h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: end;
+}
+
+.active-toggle {
+  align-self: end;
+}
+
+.table-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.status-filter {
+  min-height: 2.45rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid #d5dbe7;
+  border-radius: 0.55rem;
+  background: #fff;
+  color: #202a3c;
+}
+
+.secret-cell {
+  min-width: 14rem;
+}
+
+.secret-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.secret-value {
+  max-width: 16rem;
+  overflow-x: auto;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid #e3e8f1;
+  border-radius: 0.4rem;
+  background: #f8fafc;
+  color: #25364b;
+  font-size: 0.76rem;
+  white-space: nowrap;
+}
+
+.secret-value.masked {
+  color: #8992a3;
+  letter-spacing: 0.08em;
+}
+
+.icon-button {
+  display: inline-grid;
+  width: 2rem;
+  height: 2rem;
+  flex: none;
+  place-items: center;
+  padding: 0;
+  border: 1px solid #dfe4ed;
+  border-radius: 0.45rem;
+  background: #fff;
+  color: #3158d5;
+  cursor: pointer;
+}
+
+.icon-button:hover:not(:disabled) {
+  background: #eef2fd;
+}
+
+.icon-button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.icon-button svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (max-width: 900px) {
+  .secret-cell {
+    min-width: 0;
+  }
+
+  .secret-value {
+    max-width: none;
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .heading-actions,
+  .heading-actions .button {
+    width: 100%;
+  }
+
+  .heading-actions .button {
+    flex: 1;
+  }
+
+  .table-filters {
+    width: 100%;
+  }
+
+  .table-filters > * {
+    flex: 1 1 12rem;
+  }
+
+  .status-filter {
+    width: 100%;
+  }
+
+  .panel-heading {
+    flex-wrap: wrap;
+  }
+}
